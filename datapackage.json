@@ -1,0 +1,80 @@
+{
+  "name": "imf-weo",
+  "title": "IMF World Economic Outlook Database",
+  "homepage": "http://www.imf.org/external/ns/cs.aspx?id=28",
+  "version": "0.1.0",
+  "license": "PDDL-1.0",
+  "sources": [{
+    "name": "IMF",
+    "web": "http://www.imf.org/external/ns/cs.aspx?id=28"
+  }],
+  "resources": [
+    {
+      "name": "indicators",
+      "path": "data/indicators.csv",
+      "format": "csv",
+      "mediatype": "text/csv",
+      "bytes": 23913,
+      "schema": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "title",
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "units",
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "scale",
+            "type": "number",
+            "description": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "values",
+      "path": "data/values.csv",
+      "format": "csv",
+      "mediatype": "text/csv",
+      "bytes": 6812547,
+      "schema": {
+        "fields": [
+          {
+            "name": "Country",
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "Indicator",
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "Year",
+            "type": "integer",
+            "description": ""
+          },
+          {
+            "name": "Value",
+            "type": "number",
+            "description": ""
+          }
+        ]
+      }
+    }
+  ]
+}
