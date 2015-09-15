@@ -4,6 +4,10 @@ import pandas as pd
 import numpy as np
 
 
+from bokeh.plotting import figure
+from bokeh.resources import CDN
+from bokeh.embed import file_html, components
+
 # Country Codes for ISO alpha-2 and alpha-3 mapping https://raw.githubusercontent.com/datasets/country-codes/master/data/country-codes.csv
 country_codes=pd.read_csv("https://raw.githubusercontent.com/datasets/country-codes/master/data/country-codes.csv")
 ISO23=country_codes.loc[:,['ISO3166-1-Alpha-2', 'ISO3166-1-Alpha-3']].set_index('ISO3166-1-Alpha-2')['ISO3166-1-Alpha-3']
@@ -191,7 +195,9 @@ p = gridplot([[fig_bar, fig_cor]])
 
 
 
-show(p)
+#show(p)
+script, div = components(p)
+
 
 
 #CNN: overall numbers http://edition.cnn.com/2015/09/11/world/syria-refugee-crisis-when-war-displaces-half-a-country/
