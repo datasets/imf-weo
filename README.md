@@ -19,12 +19,15 @@ We extract this data and normalize into 2 files:
 
 * Indicators - `data/indicators.csv` - the list of indicators
 * Values - `data/values.csv` - set of values for each indicator, country, year tuple.
+* Country - 'data/country.csv' - set of value for mapping each ISO country code, WEO country code, and CLDR English Name
 
 ### Sources
 
 Note the XLS files actual turn out to be tsv files!
 
 * [Listing page for WEO Database][weo-db]
+* 2015 - http://www.imf.org/external/pubs/ft/weo/2015/01/weodata/index.aspx
+  * http://www.imf.org/external/pubs/ft/weo/2015/01/weodata/WEOApr2015all.xls
 * 2014 - http://www.imf.org/external/pubs/ft/weo/2014/01/weodata/index.aspx
   * http://www.imf.org/external/pubs/ft/weo/2014/01/weodata/WEOApr2014all.xls
 * 2011 - http://www.imf.org/external/pubs/ft/weo/2011/02/weodata/index.aspx
