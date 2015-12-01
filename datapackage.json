@@ -39,7 +39,7 @@
           },
           {
             "name": "scale",
-            "type": "number",
+            "type": "string",
             "description": ""
           }
         ]
