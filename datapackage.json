@@ -70,7 +70,7 @@
           },
           {
             "name": "Value",
-            "type": "number",
+            "type": "string",
             "description": ""
           }
         ]
