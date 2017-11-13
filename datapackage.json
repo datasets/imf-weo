@@ -4,10 +4,13 @@
   "homepage": "http://www.imf.org/external/ns/cs.aspx?id=28",
   "version": "0.1.0",
   "license": "PDDL-1.0",
-  "sources": [{
-    "name": "IMF",
-    "web": "http://www.imf.org/external/ns/cs.aspx?id=28"
-  }],
+  "sources": [
+    {
+      "name": "IMF",
+      "path": "http://www.imf.org/external/ns/cs.aspx?id=28",
+      "title": "IMF"
+    }
+  ],
   "resources": [
     {
       "name": "indicators",
