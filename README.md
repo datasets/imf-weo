@@ -38,3 +38,7 @@ Note the XLS files actual turn out to be tsv files!
 Code to extract the data from the source WEO Database is in the `scripts`
 directory.
 
+## License
+
+This Data Package is licensed by its maintainers under the [Public Domain Dedication and License (PDDL)](http://opendatacommons.org/licenses/pddl/1.0/).
+
