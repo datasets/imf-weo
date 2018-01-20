@@ -24,8 +24,8 @@ fp_2015 = 'archive/imf-weo-2015-apr.tsv'
 fp = fp_2015
 
 # Specifying the locale of the source
-import locale
-locale.setlocale(locale.LC_NUMERIC, 'English') #'English_United States.1252'
+#import locale
+#locale.setlocale(locale.LC_NUMERIC, 'English') #'English_United States.1252'
 
 
 def download():
