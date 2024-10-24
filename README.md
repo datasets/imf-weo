@@ -1,3 +1,5 @@
+<a href="https://datahub.io/core/imf-weo"><img src="https://badgen.net/badge/icon/View%20on%20datahub.io/orange?icon=https://datahub.io/datahub-cube-badge-icon.svg&label&scale=1.25)" alt="badge" /></a>
+
 IMF World Economic Outlook (WEO) database. The [IMF World Economic
 Outlook][weo] is a twice-yearly survey by IMF staff that presents IMF staff
 economists' analyses of global economic developments during the near and medium
