@@ -52,7 +52,8 @@
             "description": ""
           }
         ]
-      }
+      },
+      "description": "IMF World Economic Outlook indicator metadata including indicator ID, title, description, units, and scale."
     },
     {
       "name": "values",
@@ -83,7 +84,8 @@
             "description": ""
           }
         ]
-      }
+      },
+      "description": "IMF World Economic Outlook annual economic indicator values for countries worldwide, including GDP, current account, inflation, and other macroeconomic metrics."
     }
   ],
   "collection": "economic-data"
