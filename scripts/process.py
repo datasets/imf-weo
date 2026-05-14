@@ -89,7 +89,7 @@ def extract():
 
     values_path = os.path.join(DATA_DIR, "values.csv")
     with open(values_path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=["Country", "Indicator", "Year", "Value"])
+        writer = csv.DictWriter(f, fieldnames=["Country", "Indicator", "Year", "Value"], lineterminator="\n")
         writer.writeheader()
         writer.writerows(all_values)
     logger.info("Wrote %s (%d rows)", values_path, len(all_values))
@@ -98,7 +98,7 @@ def extract():
     meta = fetch_indicator_metadata()
     ind_path = os.path.join(DATA_DIR, "indicators.csv")
     with open(ind_path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
+        writer = csv.writer(f, lineterminator="\n")
         writer.writerow(["id", "title", "description", "units", "scale"])
         for ind in indicators:
             m = meta.get(ind, {})
@@ -112,7 +112,7 @@ def extract():
     country_names = fetch_country_names()
     country_path = os.path.join(DATA_DIR, "country.csv")
     with open(country_path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
+        writer = csv.writer(f, lineterminator="\n")
         writer.writerow(["ISO", "Name"])
         for iso in sorted(countries_seen):
             writer.writerow([iso, country_names.get(iso, "")])
