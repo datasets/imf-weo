@@ -68,7 +68,7 @@
           {
             "name": "Country",
             "type": "string",
-            "description": "ISO 2-letter country code identifying the country (e.g. 'US', 'DE'). Matches the ISO field in the country resource."
+            "description": "ISO 3166-1 alpha-3 country code identifying the country (e.g. 'USA', 'DEU'). Matches the ISO field in the country resource."
           },
           {
             "name": "Indicator",
@@ -91,7 +91,7 @@
     {
       "name": "country",
       "path": "data/country.csv",
-      "description": "Mapping table linking ISO 2-letter country codes to WEO country codes and CLDR English country names.",
+      "description": "Reference table mapping ISO 3-letter country codes to English country names, covering all countries present in the values resource.",
       "format": "csv",
       "mediatype": "text/csv",
       "schema": {
@@ -99,17 +99,12 @@
           {
             "name": "ISO",
             "type": "string",
-            "description": "ISO 2-letter country code (e.g. 'US', 'DE')."
-          },
-          {
-            "name": "WEO",
-            "type": "integer",
-            "description": "IMF WEO numeric country code (e.g. 512 for Afghanistan)."
+            "description": "ISO 3166-1 alpha-3 country code (e.g. 'USA', 'DEU')."
           },
           {
             "name": "Name",
             "type": "string",
-            "description": "CLDR English country name as used in the WEO source data."
+            "description": "English country name as returned by the IMF DataMapper API."
           }
         ]
       }
