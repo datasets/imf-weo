@@ -1,7 +1,8 @@
 {
   "name": "imf-weo",
   "title": "IMF World Economic Outlook Database",
-  "homepage": "http://www.imf.org/external/ns/cs.aspx?id=28",
+  "description": "Country-level annual macroeconomic data from the IMF World Economic Outlook (WEO) database. Covers 45 indicators (GDP, inflation, unemployment, government debt, current account balance, etc.) for approximately 190 countries from 1980 onwards, including IMF staff projections roughly 6 years into the future. Published twice a year (April and October).",
+  "homepage": "https://www.imf.org/en/Publications/WEO/weo-database/",
   "version": "0.1.0",
   "licenses": [
     {
@@ -12,15 +13,16 @@
   ],
   "sources": [
     {
-      "name": "IMF",
-      "path": "http://www.imf.org/external/ns/cs.aspx?id=28",
-      "title": "IMF"
+      "name": "IMF World Economic Outlook Database",
+      "path": "https://www.imf.org/en/Publications/WEO/weo-database/",
+      "title": "IMF World Economic Outlook Database"
     }
   ],
   "resources": [
     {
       "name": "indicators",
       "path": "data/indicators.csv",
+      "description": "Reference list of the 45 WEO subject indicators, including their codes, human-readable titles, descriptions, units, and scale.",
       "format": "csv",
       "mediatype": "text/csv",
       "bytes": 23913,
@@ -29,27 +31,27 @@
           {
             "name": "id",
             "type": "string",
-            "description": ""
+            "description": "WEO subject code that uniquely identifies the indicator (e.g. NGDP_R, LUR)."
           },
           {
             "name": "title",
             "type": "string",
-            "description": ""
+            "description": "Human-readable indicator name including its unit in parentheses (e.g. 'Gross domestic product, constant prices (Percent change)')."
           },
           {
             "name": "description",
             "type": "string",
-            "description": ""
+            "description": "Detailed IMF methodological description of the indicator. May be empty for some indicators."
           },
           {
             "name": "units",
             "type": "string",
-            "description": ""
+            "description": "Unit of measurement for the indicator values (e.g. 'Percent change', 'U.S. dollars', 'National currency')."
           },
           {
             "name": "scale",
             "type": "string",
-            "description": ""
+            "description": "Scale multiplier for the reported values (e.g. 'Billions', 'Millions'). Empty when values are not scaled."
           }
         ]
       }
@@ -57,6 +59,7 @@
     {
       "name": "values",
       "path": "data/values.csv",
+      "description": "Annual indicator values for each country-indicator-year combination. Rows with source value 'n/a' are excluded. A small number of rows contain '--' in the Value field where the source value could not be parsed as a number.",
       "format": "csv",
       "mediatype": "text/csv",
       "bytes": 6812547,
@@ -65,22 +68,43 @@
           {
             "name": "Country",
             "type": "string",
-            "description": ""
+            "description": "ISO 3166-1 alpha-3 country code identifying the country (e.g. 'USA', 'DEU'). Matches the ISO field in the country resource."
           },
           {
             "name": "Indicator",
             "type": "string",
-            "description": ""
+            "description": "WEO subject code identifying the indicator. Matches the id field in the indicators resource."
           },
           {
             "name": "Year",
-            "type": "integer",
-            "description": ""
+            "type": "year",
+            "description": "Calendar year of the observation or IMF projection."
           },
           {
             "name": "Value",
             "type": "string",
-            "description": ""
+            "description": "Numeric value of the indicator for the given country and year, expressed in the units and scale defined in the indicators resource. A small number of rows contain '--' where the source value could not be parsed."
+          }
+        ]
+      }
+    },
+    {
+      "name": "country",
+      "path": "data/country.csv",
+      "description": "Reference table mapping ISO 3-letter country codes to English country names, covering all countries present in the values resource.",
+      "format": "csv",
+      "mediatype": "text/csv",
+      "schema": {
+        "fields": [
+          {
+            "name": "ISO",
+            "type": "string",
+            "description": "ISO 3166-1 alpha-3 country code (e.g. 'USA', 'DEU')."
+          },
+          {
+            "name": "Name",
+            "type": "string",
+            "description": "English country name as returned by the IMF DataMapper API."
           }
         ]
       }

@@ -1,189 +1,125 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# Fixing unicode issues e.g. STP:  São Tomé and Príncipe
-import os
-if not os.getenv('PYTHONIOENCODING', None): # PyInstaller workaround
-    os.environ['PYTHONIOENCODING'] = 'utf_8'
+#!/usr/bin/env python3
+"""
+Fetch the IMF World Economic Outlook (WEO) dataset via the IMF SDMX API.
 
+Requires Python 3.8+ and:
+    pip install sdmx1 pandas
+
+Output: data/values.csv, data/indicators.csv, data/country.csv
+"""
 import csv
-import urllib.request #Python 3
+import json
 import logging
-import codecs
-import sys
+import os
+import urllib.request
 
-logger = logging.getLogger()
-logging.basicConfig(level=logging.INFO)
+import sdmx
 
-url_2014 = 'http://www.imf.org/external/pubs/ft/weo/2014/01/weodata/WEOApr2014all.xls'
-url_2015 = 'http://www.imf.org/external/pubs/ft/weo/2015/01/weodata/WEOApr2015all.xls'
-url = url_2015
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
-# weirdly it turns out the xls (url_2014) is in fact a tsv file ...
-fp_2014 = 'archive/imf-weo-2015-feb.tsv'
-fp_2015 = 'archive/imf-weo-2015-apr.tsv'
-fp = fp_2015
-
-# Specifying the locale of the source
-import locale
-locale.setlocale(locale.LC_NUMERIC, 'English') #'English_United States.1252'
+SDMX_SOURCE = "IMF_DATA"
+DATAFLOW = "WEO"
+DATA_DIR = "data"
+DATAMAPPER_BASE = "https://www.imf.org/external/datamapper/api/v1"
 
 
-def download():
-    logger.info('Retrieving source database: %s ...' % url)
-    #urllib.request.urlretrieve fp)
-    f=urllib.request.urlopen(url)
-    output=f.read().decode('cp1252')
-
-    path=os.path.dirname(fp)
-    if not os.path.exists(path):
-        os.makedirs(path)
-        
-    with codecs.open(fp, "w", "utf-8") as temp:
-        temp.write(output)
-    
-    logger.info('Source database downloaded to: %s' % fp)
+def _fetch_json(url, timeout=30):
+    with urllib.request.urlopen(url, timeout=timeout) as f:
+        return json.loads(f.read().decode())
 
 
-def f_open(fn):
-    if sys.version_info >= (3,0,0):
-        f = open(fn, 'w', newline='', encoding='utf-8')
-    else:
-        f = open(filename, 'wb')
-    return f
-    
+def _ensure_data_dir():
+    os.makedirs(DATA_DIR, exist_ok=True)
+
+
+def discover_indicators(client):
+    """Return sorted list of WEO indicator codes from SDMX (uses USA as probe)."""
+    logger.info("Discovering available WEO indicators...")
+    resp = client.data(DATAFLOW, key="USA..A")
+    df = sdmx.to_pandas(resp)
+    indicators = sorted(df.index.get_level_values("INDICATOR").unique().tolist())
+    logger.info("  %d indicators found", len(indicators))
+    return indicators
+
+
+def fetch_indicator_metadata():
+    """Return {id: {label, description, unit}} from IMF DataMapper API."""
+    logger.info("Fetching indicator metadata from DataMapper API...")
+    data = _fetch_json(f"{DATAMAPPER_BASE}/indicators")
+    return data.get("indicators", {})
+
+
+def fetch_country_names():
+    """Return {iso3: name} from IMF DataMapper API."""
+    logger.info("Fetching country names from DataMapper API...")
+    data = _fetch_json(f"{DATAMAPPER_BASE}/countries")
+    return {k: v.get("label", "") for k, v in data.get("countries", {}).items()}
 
 
 def extract():
-    logger.info('Starting extraction of data from: %s' % fp)
-    reader = csv.DictReader(open(fp, encoding='utf-8'), delimiter='\t')
-    indicators = {}
-    WEOcountry_names=dict() #countrys = {}
-    WEOcountry_codes=dict()
-    values = []
+    _ensure_data_dir()
+    client = sdmx.Client(SDMX_SOURCE)
 
-    years = reader.fieldnames[9:-1]
+    indicators = discover_indicators(client)
 
-    
+    # --- values.csv ---
+    all_values = []
+    countries_seen = set()
 
-    for count, row in enumerate(reader):
-        # last 2 rows are blank/metadata
-        # so get out when we hit a blank row
-        if not row['Country']:
-            break
+    for i, ind in enumerate(indicators, 1):
+        logger.info("[%d/%d] Fetching %s ...", i, len(indicators), ind)
+        try:
+            resp = client.data(DATAFLOW, key=f".{ind}.A")
+            df = sdmx.to_pandas(resp).reset_index()
+        except Exception as e:
+            logger.warning("  SKIP %s: %s", ind, e)
+            continue
 
-        indicators[row['WEO Subject Code']] = [
-            row['Subject Descriptor'] + ' (%s)' % row['Units'],  
-            row['Subject Notes'],
-            row['Units'],
-            row['Scale']
-            ]
-        
-        # not sure we really need given iso is standard
-        # just for double check on data integrity and names encoding
-        if row['ISO'] not in WEOcountry_names:
-            WEOcountry_names[row['ISO']] = row['Country']
-            try:
-                WEOcountry_codes[row['ISO']] = row['WEO Country Code']
-            except:
-                print(row)
-                break;
+        for _, row in df.iterrows():
+            country = row["COUNTRY"]
+            countries_seen.add(country)
+            all_values.append({
+                "Country": country,
+                "Indicator": ind,
+                "Year": row["TIME_PERIOD"],
+                "Value": row["value"],
+            })
+        logger.info("  -> %d rows across %d countries", len(df), df["COUNTRY"].nunique())
 
-        # need to store notes somewhere with an id ...
-        # also need to uniquify the notes ...
-        notes = row['Country/Series-specific Notes']
-        newrow = {
-            'Country': row['ISO'],
-            'Indicator': row['WEO Subject Code'],
-            'Year': None,
-            'Value': None
-            }
-        for year in years:
-            if row[year] != 'n/a':
-                tmprow = dict(newrow)
-                try:
-                    tmprow['Value'] = locale.atof (row[year] )          # Converting "1,033.591" to 1033.591
-                except:
-                    tmprow['Value'] = row[year] 
-                tmprow['Year'] = year
-                values.append(tmprow)
+    values_path = os.path.join(DATA_DIR, "values.csv")
+    with open(values_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=["Country", "Indicator", "Year", "Value"], lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(all_values)
+    logger.info("Wrote %s (%d rows)", values_path, len(all_values))
 
-        # TODO: indicate whether a value is an estimate using
-        # 'Estimates Start After'
+    # --- indicators.csv ---
+    meta = fetch_indicator_metadata()
+    ind_path = os.path.join(DATA_DIR, "indicators.csv")
+    with open(ind_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f, lineterminator="\n")
+        writer.writerow(["id", "title", "description", "units", "scale"])
+        for ind in indicators:
+            m = meta.get(ind, {})
+            label = m.get("label", ind)
+            unit = m.get("unit", "")
+            title = f"{label} ({unit})" if unit else label
+            writer.writerow([ind, title, m.get("description", ""), unit, ""])
+    logger.info("Wrote %s", ind_path)
 
-        # delete 'Estimates Start After'
-    
-    outfp = 'data/indicators.csv'
-   
-    path=os.path.dirname(outfp)
-    if not os.path.exists(path):
-        os.makedirs(path)
+    # --- country.csv ---
+    country_names = fetch_country_names()
+    country_path = os.path.join(DATA_DIR, "country.csv")
+    with open(country_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f, lineterminator="\n")
+        writer.writerow(["ISO", "Name"])
+        for iso in sorted(countries_seen):
+            writer.writerow([iso, country_names.get(iso, "")])
+    logger.info("Wrote %s (%d countries)", country_path, len(countries_seen))
 
-    writer = csv.writer(f_open(outfp))
-    indheader = ['id', 'title', 'description', 'units', 'scale']
-    writer.writerow(indheader)
-    for k in sorted(indicators.keys()):
-        writer.writerow( [k] + indicators[k] )
-    logger.info('Number of Indicators included: {}'.format(len(indicators.keys())))
-
-    outfp = 'data/country.csv'
-    writer = csv.writer(f_open(outfp))
-    header = ['ISO', 'WEO', 'Name']
-    writer.writerow(header)
-    for k in sorted(WEOcountry_names.keys()):
-        writer.writerow( [k] + [WEOcountry_codes[k],WEOcountry_names[k],])
-    logger.info('Number of Countries included: {}'.format(len(WEOcountry_names.keys())))
+    logger.info("Extraction complete.")
 
 
-    outfp = 'data/values.csv'
-    f = f_open(outfp)
-    writer = csv.writer(f)
-    header = ['Country', 'Indicator', 'Year', 'Value']
-    writer = csv.DictWriter(f, header)
-    writer.writeheader()
-    writer.writerows(values)
-
-
-    logger.info('Completed data extraction to data/ directory')
-
-def process():
-    download()
+if __name__ == "__main__":
     extract()
-
-def check_indicators():
-    reader = csv.DictReader(open(fp, encoding='utf-8'), delimiter='\t')
-    header = ['id', 'title', 'description']
-    indicators = {}
-    for count, row in enumerate(reader):
-        id = row['WEO Subject Code']
-        notes = row['Subject Notes']
-        ind = [
-            row['Subject Descriptor'],
-            notes,
-            row['Units'],
-            row['Scale']
-            ]
-        # check whether indicators differ
-        # in their descriptions etc
-        if id in indicators:
-            if indicators[id][1] != notes:
-                print(count)
-                print(notes)
-            if indicators[id][2] != row['Units']:
-                print(count)
-                print(row['Units'])
-            if indicators[id][3] != row['Scale']:
-                print(count)
-                print(row['Scale'])
-        indicators[id] = ind
-    print(len(indicators)) 
-    for k,v in indicators.items():
-        print (k, '\t\t',  v[0])
-
-# check_indicators()
-
-#'''
-if __name__ == '__main__':
-    # extract()
-    process()
-#'''
-

@@ -8,8 +8,8 @@ Database][weo-db], a country-level dataset of major macro-economic variables
 (GDP, Unemployment, Debt etc). It is the data from that database which is
 provided here.
 
-[weo]: http://www.imf.org/external/ns/cs.aspx?id=29
-[weo-db]: http://www.imf.org/external/ns/cs.aspx?id=28
+[weo]: https://www.imf.org/en/Publications/WEO
+[weo-db]: https://www.imf.org/en/Publications/WEO/weo-database/
 
 ## Data
 
@@ -28,12 +28,9 @@ We extract this data and normalize into 2 files:
 Note the XLS files actual turn out to be tsv files!
 
 * [Listing page for WEO Database][weo-db]
-* 2015 - http://www.imf.org/external/pubs/ft/weo/2015/01/weodata/index.aspx
-  * http://www.imf.org/external/pubs/ft/weo/2015/01/weodata/WEOApr2015all.xls
-* 2014 - http://www.imf.org/external/pubs/ft/weo/2014/01/weodata/index.aspx
-  * http://www.imf.org/external/pubs/ft/weo/2014/01/weodata/WEOApr2014all.xls
-* 2011 - http://www.imf.org/external/pubs/ft/weo/2011/02/weodata/index.aspx
-  * http://www.imf.org/external/pubs/ft/weo/2011/02/weodata/WEOSep2011all.xls
+* 2015 - http://www.imf.org/external/pubs/ft/weo/2015/01/weodata/WEOApr2015all.xls (index page no longer available)
+* 2014 - http://www.imf.org/external/pubs/ft/weo/2014/01/weodata/WEOApr2014all.xls (index page no longer available)
+* 2011 - http://www.imf.org/external/pubs/ft/weo/2011/02/weodata/WEOSep2011all.xls (index page no longer available)
 
 ## Preparation
 
